@@ -19,6 +19,7 @@ def main():
 
         # Search through the CSV file. Break from the search if the username is found.
         while not username_match and username != 'quit':
+            users_file.seek(0)
             user_data_line = 0
             for user_line in users_file:
                 user_data_line += 1
@@ -39,11 +40,23 @@ def main():
         while password != 'quit' and password != linecache.getline("users.csv", user_data_line).split(",")[2].rstrip():
             password = input("Invalid password! Try again, or type 'quit' to quit: ")
 
+        # If the user wishes to proceed, continue using their assigned role and corresponding class.
         if password != 'quit':
+            user = None
+
+            # Match the user's role.
             match user_role:
                 case 'Admin':
-                    admin = employee.Admin(username, password)
+                    user = employee.Admin(username, password)
+                case 'Engineer':
+                    user = employee.Engineer(username, password)
+                case 'Intern':
+                    user = employee.Intern(username, password)
+                case _:
+                    print("Invalid role.")
 
+            if user is not None:
+                user.terminal()
 
     # Close the file, relay a farewell.
     users_file.close()
