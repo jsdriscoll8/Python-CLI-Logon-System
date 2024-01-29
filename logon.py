@@ -1,7 +1,12 @@
 import linecache
-
 import employee
-import io
+
+# Global constant definitions
+ROLE_COL_POS = 0
+USERNAME_COL_POS = 1
+PASSWORD_COL_POS = 2
+FILE_START = 0
+
 
 # Main logon program.
 def main():
@@ -9,21 +14,20 @@ def main():
     users_file = open("users.csv", "r")
     print("Welcome to the company portal!")
     username = input("Enter your username to continue, or type 'quit' to quit: ")
-    user_data_line = 0
+    user_data_line = FILE_START
 
     # Quit on user command.
     # Otherwise, look through the password file and find their logon information.
     if username != 'quit':
-        user_data = None
         username_match = False
 
         # Search through the CSV file. Break from the search if the username is found.
         while not username_match and username != 'quit':
-            users_file.seek(0)
-            user_data_line = 0
+            users_file.seek(FILE_START)
+            user_data_line = FILE_START
             for user_line in users_file:
                 user_data_line += 1
-                user_data = user_line.split(",")[1]
+                user_data = user_line.split(",")[USERNAME_COL_POS]
                 if user_data == username:
                     username_match = True
                     break
@@ -35,9 +39,10 @@ def main():
     # If a valid username is entered, continue.
     if username != 'quit':
         # Get the user's role, and ask them for their password.
-        user_role = linecache.getline("users.csv", user_data_line).split(",")[0]
+        user_role = linecache.getline("users.csv", user_data_line).split(",")[ROLE_COL_POS]
         password = input("Please enter your password, or type 'quit' to quit: ")
-        while password != 'quit' and password != linecache.getline("users.csv", user_data_line).split(",")[2].rstrip():
+        while (password != 'quit' and
+               password != linecache.getline("users.csv", user_data_line).split(",")[PASSWORD_COL_POS].rstrip()):
             password = input("Invalid password! Try again, or type 'quit' to quit: ")
 
         # If the user wishes to proceed, continue using their assigned role and corresponding class.
