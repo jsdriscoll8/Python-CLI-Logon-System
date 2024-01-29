@@ -4,11 +4,11 @@
 <p> <b>Employee:</b> Template class
 representing an employee with username and password fields, as well as a terminal program
 with an associated helper function.</p>
-<p> <b> Admin: </b> Possesses full access rights and can
+<p> <b> Admin(Employee): </b> Possesses full access rights and can
 perform any function from the intranet portal.</p>
-<p> <b> Engineer: </b> Possesses rights to their own timesheet
+<p> <b> Engineer(Employee): </b> Possesses rights to their own timesheet
 as well as project documents, but not management operations.</p>
-<p> <b> Intern: </b> Possesses access rights only to their 
+<p> <b> Intern(Employee): </b> Possesses access rights only to their 
 personal timesheet. </p>
 
 <h2><u>Logon Portal and Intranet</u></h2>
@@ -35,3 +35,7 @@ are comma separated. Used by the logon portal.</p>
             quit voluntarily. </li>
         </ul>
 </ul>
+
+<h2><u>Testing Instructions</u></h2>
+<p> Run the program. Find a username and password in the included CSV file
+to use as logon credentials. Follow the prompts to log in and access the terminal program.</p>
