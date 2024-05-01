@@ -12,7 +12,7 @@ app = Flask(__name__)
 def main_login_screen():
     error = None
     # Username, password input handling
-    if request.method == "POST":
+    if request.method == "POST" :
         # Get input username & password; create database connection
         input_username = request.form['username']
         input_password = request.form['password']
@@ -29,6 +29,12 @@ def main_login_screen():
         else:
             error = "Invalid username or password!"
     return render_template("login_screen.html", error=error)
+
+
+# Route to new user registration page
+@app.route("/employee_registration")
+def employee_registration_screen():
+    return render_template("employee_registration.html")
 
 
 # Routes to successful logon pages
