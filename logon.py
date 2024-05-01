@@ -5,7 +5,6 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 
 # Flask app
 app = Flask(__name__)
-app.secret_key = "al;ksjdflak;sdhnasdclbaeupqo2erhpq2o3854"
 
 
 # Main logon route
@@ -22,15 +21,30 @@ def main_login_screen():
         # If the user exists, take them to the page corresponding to their permissions.
         # Otherwise, flash a message indicating they have mis-input their password.
         if db_connect.employee_query(input_username, input_password) == "ADMIN":
-            return redirect(url_for("admin_logged_on"))
+            return redirect(url_for("admin_logged_on", username=input_username))
+        elif db_connect.employee_query(input_username, input_password) == "ENGINEER":
+            return redirect(url_for("engineer_logged_on", username=input_username))
+        elif db_connect.employee_query(input_username, input_password) == "INTERN":
+            return redirect(url_for("intern_logged_on", username=input_username))
         else:
             error = "Invalid username or password!"
     return render_template("login_screen.html", error=error)
 
 
-@app.route("/admin_logged_on")
-def admin_logged_on():
-    return render_template("admin_logged_on.html")
+# Routes to successful logon pages
+@app.route("/admin_logged_on/<username>")
+def admin_logged_on(username):
+    return render_template("admin_logged_on.html", username=username)
+
+
+@app.route("/engineer_logged_on/<username>")
+def engineer_logged_on(username):
+    return render_template("engineer_logged_on.html", username=username)
+
+
+@app.route("/intern_logged_on/<username>")
+def intern_logged_on(username):
+    return render_template("intern_logged_on.html", username=username)
 
 
 # Run the flask app
