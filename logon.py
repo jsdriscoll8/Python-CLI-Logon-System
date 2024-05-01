@@ -1,15 +1,33 @@
 import linecache
 import employee
+from flask import Flask, render_template
 
-# Global constant definitions
-ROLE_COL_POS = 0
-USERNAME_COL_POS = 1
-PASSWORD_COL_POS = 2
-FILE_START = 0
+# Flask app
+app = Flask(__name__)
 
 
-# Main logon program.
+# App route
+@app.route("/")
+def run_app():
+    return render_template("login_screen.html")
+
+
+# Run the flask app
 def main():
+    app.run()
+
+
+if __name__ == '__main__':
+    main()
+
+
+"""
+    # Global constant definitions
+    ROLE_COL_POS = 0
+    USERNAME_COL_POS = 1
+    PASSWORD_COL_POS = 2
+    FILE_START = 0
+    
     # Open the stored users file and relay a greeting, asking the user for their username & password.
     users_file = open("users.csv", "r")
     print("Welcome to the company portal!")
@@ -66,7 +84,4 @@ def main():
     # Close the file, relay a farewell.
     users_file.close()
     print("Logging off...")
-
-
-if __name__ == '__main__':
-    main()
+"""
