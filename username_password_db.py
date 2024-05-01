@@ -1,6 +1,7 @@
 import sqlite3
 
 EMPLOYEE_DB_FILE = "./instance/var/db/employee.db"
+PERMS_COL = 2
 
 
 # Database class for employee portal
@@ -42,8 +43,8 @@ class EmployeeDatabase:
         db_connection.close()
 
     # Perform a parameterized query on the database.
-    # If this user exists, return True; otherwise return False
-    def employee_query(self, username, password) -> bool:
+    # If this user exists, return their permissions; otherwise return False
+    def employee_query(self, username, password):
         # Connect to the database; create cursor; set up query
         db_connection = sqlite3.connect(EMPLOYEE_DB_FILE)
         db_cursor = db_connection.cursor()
@@ -60,11 +61,9 @@ class EmployeeDatabase:
         # Return true if this username & password exist.
         if len(account) == 0:
             return False
-        return True
+        return account[0][PERMS_COL]
 
 
 
 employee_db = EmployeeDatabase()
 # Run setup employee_db.setup()
-
-employee_db.employee_query("jsdri", "Janu28Tw3nty24!")

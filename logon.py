@@ -1,15 +1,36 @@
 import linecache
 import employee
-from flask import Flask, render_template
+import username_password_db
+from flask import Flask, render_template, request, redirect, url_for, flash
 
 # Flask app
 app = Flask(__name__)
+app.secret_key = "al;ksjdflak;sdhnasdclbaeupqo2erhpq2o3854"
 
 
-# App route
-@app.route("/")
-def run_app():
-    return render_template("login_screen.html")
+# Main logon route
+@app.route("/", methods=['GET', 'POST'])
+def main_login_screen():
+    error = None
+    # Username, password input handling
+    if request.method == "POST":
+        # Get input username & password; create database connection
+        input_username = request.form['username']
+        input_password = request.form['password']
+        db_connect = username_password_db.EmployeeDatabase()
+
+        # If the user exists, take them to the page corresponding to their permissions.
+        # Otherwise, flash a message indicating they have mis-input their password.
+        if db_connect.employee_query(input_username, input_password) == "ADMIN":
+            return redirect(url_for("admin_logged_on"))
+        else:
+            error = "Invalid username or password!"
+    return render_template("login_screen.html", error=error)
+
+
+@app.route("/admin_logged_on")
+def admin_logged_on():
+    return render_template("admin_logged_on.html")
 
 
 # Run the flask app

@@ -10,17 +10,25 @@
             Employee Logon
         </h1>
 
-        <label for="username">
-            <strong>Username: </strong>
-        </label>
-        <input type="text" placeholder="user1234" name="username" required>
-        <br><br>
+        <form method="post">
+            <label for="username">
+                <strong>Username: </strong>
+            </label>
+            <input type="text" placeholder="user1234" name="username" required>
+            <br><br>
 
-        <label for="password">
-            <strong>Password: </strong>
-        </label>
-        <input type="password" placeholder="pwd1234" name="password" required>
+            <label for="password">
+                <strong>Password: </strong>
+            </label>
+            <input type="password" placeholder="pwd1234" name="password" required>
 
-        <button type="submit">Login!</button>
+            <button type="submit">Login!</button>
+        </form>
+
+        <br>
+
+        {% if error%}
+            <p><strong>{{error}}</strong></p>
+        {% endif%}
     </body>
 </html>
