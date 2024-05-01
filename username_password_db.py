@@ -1,7 +1,13 @@
 import sqlite3
+import hashlib
+import string
+import random
 
+# Constant definitions
 EMPLOYEE_DB_FILE = "./instance/var/db/employee.db"
+PW_COL = 1
 PERMS_COL = 2
+SALT_LENGTH = 40
 
 
 # Database class for employee portal
@@ -17,10 +23,36 @@ class EmployeeDatabase:
 
     INSERT_DEF_VALUES = """
                            INSERT INTO employee_accounts VALUES
-                           ("jsdri", "Janu28Tw3nty24!", "ADMIN"),
-                           ("jeddy", "Pr0f3550r_", "ENGINEER"),
-                           ("fshman", "password", "INTERN")
+                           ("jsdri", "DqPxdKU1S1fnpkWgZopBdhgujhqFYVaYMFgm95DC2b34ed7d0626395a93d4a2050d71060468deb7e4", "ADMIN"),
+                           ("jeddy", "tWPoPE75pjiFNKG5Xsh4GSX5HxI2pu5fMdvPlQ6W29257cb4f28083aa289a132712b3f547078e6d78", "ENGINEER"),
+                           ("fshman", "6IKN44WsbrrIOubU1kbYPzBO8555VsNEPrh6FBHHf0e83429212632df4385ae734fac0a580d9e01bb", "INTERN")
                         """
+
+    # Generate the hashed version of a password
+    def hash_pw(self, plain_text) -> str:
+        # Helper function: generate a random salt
+        def randomword(length) -> str:
+            letters_and_digits = string.ascii_letters + string.digits
+            return ''.join(random.choice(letters_and_digits) for i in range(length))
+
+        # Generate a salt, hash the password + salt, and return the salt + hashed(salt + pw)
+        salt = randomword(SALT_LENGTH)
+        hashable = salt + plain_text  # concatenate salt and plain_text
+        hashable = hashable.encode('utf-8')  # convert to bytes
+        this_hash = hashlib.sha1(hashable).hexdigest()  # hash w/ SHA-1 and hexdigest
+        salted_hashed_pw = salt + this_hash
+        return salted_hashed_pw
+
+    def authenticate(self, stored_password: str, input_password: str) -> bool:
+        # Get the stored salt & hash. Use the salt to compare the stored password to the input password.
+        salt = stored_password[:SALT_LENGTH]  # extract salt from stored value
+        stored_hash = stored_password[SALT_LENGTH:]  # extract hash from stored value
+        hashable = salt + input_password  # concatenate hash and plain text
+        hashable = hashable.encode('utf-8')  # convert to bytes
+        this_hash = hashlib.sha1(hashable).hexdigest()  # hash and digest
+
+        # Return the result of this comparison
+        return this_hash == stored_hash
 
     # Run the setup to create the employee table
     def setup(self) -> None:
@@ -44,26 +76,34 @@ class EmployeeDatabase:
 
     # Perform a parameterized query on the database.
     # If this user exists, return their permissions; otherwise return False
-    def employee_query(self, username, password):
+    def employee_query(self, username: str, input_password: str):
         # Connect to the database; create cursor; set up query
         db_connection = sqlite3.connect(EMPLOYEE_DB_FILE)
         db_cursor = db_connection.cursor()
         query = ("SELECT * FROM employee_accounts "
-                 "WHERE username = ? AND pw_hash = ?")
+                 "WHERE username = ?")
 
-        # Parameterize, execute query.
-        account = db_cursor.execute(query, (username, password)).fetchall()
+        # Parameterize, execute query. If there is no password for this username, the account does not exist.
+        account = db_cursor.execute(query, (username,)).fetchall()
+        if len(account) == 0:
+            return False
+
+        # Otherwise, get the hashed password.
+        hashed_password = account[0][PW_COL]
 
         # Close cursor, connection
         db_cursor.close()
         db_connection.close()
 
-        # Return true if this username & password exist.
-        if len(account) == 0:
+        # Return false if the passwords do not match; return the user's permissions level otherwise.
+        if not self.authenticate(hashed_password, input_password):
             return False
         return account[0][PERMS_COL]
 
 
-
 employee_db = EmployeeDatabase()
-# Run setup employee_db.setup()
+
+# Run setup
+# employee_db.setup()
+
+employee_db.employee_query("jsdri", "Janu28Tw3nty24!")
