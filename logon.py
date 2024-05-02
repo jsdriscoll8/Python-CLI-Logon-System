@@ -1,18 +1,25 @@
-import linecache
-import employee
+import string
+import random
 import username_password_db
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, session
 
-# Flask app
+# Constants
 app = Flask(__name__)
+app.secret_key = ''
+for char in range(30):
+    app.secret_key += random.choice(string.ascii_lowercase)
+MAX_LOGIN_ATTEMPTS = 3
 
 
 # Main logon route
 @app.route("/", methods=['GET', 'POST'])
 def main_login_screen():
     error = None
+    if 'login_attempts' not in session:
+        session['login_attempts'] = 0
+
     # Username, password input handling
-    if request.method == "POST" :
+    if request.method == "POST":
         # Get input username & password; create database connection
         input_username = request.form['username']
         input_password = request.form['password']
@@ -20,6 +27,8 @@ def main_login_screen():
 
         # If the user exists, take them to the page corresponding to their permissions.
         # Otherwise, flash a message indicating they have mis-input their password.
+        if session['login_attempts'] >= MAX_LOGIN_ATTEMPTS:
+            return 0
         if db_connect.employee_query(input_username, input_password) == "ADMIN":
             return redirect(url_for("admin_logged_on", username=input_username))
         elif db_connect.employee_query(input_username, input_password) == "ENGINEER":
@@ -28,6 +37,11 @@ def main_login_screen():
             return redirect(url_for("intern_logged_on", username=input_username))
         else:
             error = "Invalid username or password!"
+            session['login_attempts'] += 1
+            if session['login_attempts'] == MAX_LOGIN_ATTEMPTS:
+                print("Hello")
+                error = "You have reached the maximum number of login attempts!"
+
     return render_template("login_screen.html", error=error)
 
 
@@ -35,15 +49,20 @@ def main_login_screen():
 @app.route("/employee_registration", methods=['GET', 'POST'])
 def employee_registration_screen():
     message = None
+    strong_password = None
+
     # Username, password input handling
-    if request.method == "POST":
+    if request.method == "POST" and "username" in request.form:
         # Get input username & password; create database connection
         input_username = request.form['username']
         input_password = request.form['password']
         db_connect = username_password_db.EmployeeDatabase()
-
         message = db_connect.add_new_user(input_username, input_password)
-    return render_template("employee_registration.html", message=message)
+
+    # Post request without username: generate strong password
+    if request.method == "POST" and "generate" in request.form:
+        strong_password = create_strong_password()
+    return render_template("employee_registration.html", message=message, password=strong_password)
 
 
 # Routes to successful logon pages
@@ -60,6 +79,25 @@ def engineer_logged_on(username):
 @app.route("/intern_logged_on/<username>")
 def intern_logged_on(username):
     return render_template("intern_logged_on.html", username=username)
+
+
+# Returns a strong password of length 12
+def create_strong_password():
+    strong_password = ""
+    loop_iterations = 3  # 3 loop iterations * 4 random characters = length 12 password
+
+    for char in range(loop_iterations):
+        # Generate a random lowercase letter, uppercase letter, digit, and special character
+        rand_lowercase = random.choice(string.ascii_lowercase)
+        rand_uppercase = random.choice(string.ascii_uppercase)
+        rand_digit = random.choice(string.digits)
+        rand_special_character = random.choice(string.punctuation)
+
+        # Add these characters to the password, then shuffle it.
+        strong_password += (rand_lowercase + rand_uppercase + rand_digit + rand_special_character)
+        strong_password = ''.join(random.sample(list(strong_password), len(strong_password)))
+
+    return strong_password
 
 
 # Run the flask app

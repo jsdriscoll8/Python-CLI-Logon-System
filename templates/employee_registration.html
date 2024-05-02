@@ -22,8 +22,21 @@
             </label>
             <input type="password" placeholder="pwd1234" name="password" required>
 
-            <button type="submit">Login!</button>
+            <button type="submit">Register!</button>
         </form>
+
+        <br>
+
+        <form method="post">
+            <label for="generate">
+                Generate a strong random password:
+            </label>
+            <button type="submit" name="generate"> Click here! </button>
+        </form>
+
+        {% if password%}
+                <p><strong>{{password}}</strong></p>
+        {% endif%}
 
         {% if message%}
             <p><strong>{{message}}</strong></p>
