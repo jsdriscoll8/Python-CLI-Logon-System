@@ -32,9 +32,18 @@ def main_login_screen():
 
 
 # Route to new user registration page
-@app.route("/employee_registration")
+@app.route("/employee_registration", methods=['GET', 'POST'])
 def employee_registration_screen():
-    return render_template("employee_registration.html")
+    message = None
+    # Username, password input handling
+    if request.method == "POST":
+        # Get input username & password; create database connection
+        input_username = request.form['username']
+        input_password = request.form['password']
+        db_connect = username_password_db.EmployeeDatabase()
+
+        message = db_connect.add_new_user(input_username, input_password)
+    return render_template("employee_registration.html", message=message)
 
 
 # Routes to successful logon pages
